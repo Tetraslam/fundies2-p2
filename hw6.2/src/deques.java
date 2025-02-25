@@ -19,6 +19,11 @@ abstract class ANode<T> {
 class Node<T> extends ANode<T> {
   T value;
    
+  Node(T value) {
+    super(null, null);
+    this.value = value;
+  }
+
   Node(T value, ANode<T> next, ANode<T> prev) {
     super(next, prev);
     this.value = value;

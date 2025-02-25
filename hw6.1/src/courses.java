@@ -368,14 +368,13 @@ class Examples {
   boolean testSameInstructor(Tester t) {
     initData();
     Instructor prof1copy = new Instructor("Daniel Patterson");
-    Course cs2510copy = new Course("CS2510", prof1copy);
     Course cs2500copy = new Course("CS2500", prof1copy);
+    Course cs2510copy = new Course("CS2510", prof1copy);
     Student shreshtcopy = new Student("Shresht Bhowmick", 1);
     Student lyannecopy = new Student("Lyanne Xu", 2);
     Student bensencopy = new Student("Bensen Wang", 3);
-    Student tylercopy = new Student("Tyler Dong", 4);
     Student eoincopy = new Student("Eoin Collette", 5);
-    
+
     shreshtcopy.enroll(cs2500copy);
     lyannecopy.enroll(cs2500copy);
     lyannecopy.enroll(cs2510copy);
