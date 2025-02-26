@@ -106,7 +106,7 @@ class Leaf extends ATree {
         }
         else {
             throw new IllegalArgumentException("Tried to encode " +  
-            letter + "but that is not part of the language.");
+            letter + " but that is not part of the language.");
         }
     }
 
@@ -138,7 +138,7 @@ class Node extends ATree {
         }
 
         throw new IllegalArgumentException("Tried to encode " +  
-        letter + "but that is not part of the language.");
+        letter + " but that is not part of the language.");
     }
 
     // returns if the letter is in the left or right part of the node
@@ -146,3 +146,89 @@ class Node extends ATree {
         return this.left.contains(letter) || this.right.contains(letter);
     }
 }
+
+class ExamplesHuffman {
+    void testConstructor(Tester t) {
+      ArrayList<String> fundies = new ArrayList<String>();
+      fundies.add("f");
+      fundies.add("u");
+      fundies.add("n");
+      fundies.add("d");
+      fundies.add("i");
+      fundies.add("e");
+      fundies.add("s");
+      
+      ArrayList<Integer> shortListInts = new ArrayList<Integer>();
+      shortListInts.add(1);
+      shortListInts.add(1);
+      
+      ArrayList<String> oneString = new ArrayList<String>();
+      oneString.add("r");
+  
+      t.checkConstructorExceptionType(IllegalArgumentException.class, "Huffman", fundies, shortListInts);
+      
+      t.checkConstructorExceptionType(IllegalArgumentException.class, "Huffman", oneString, shortListInts);
+    }
+  
+    ArrayList<String> better;
+    ArrayList<Integer> betterNums;
+    ArrayList<Boolean> result;
+    ArrayList<Boolean> badResult;
+    Huffman h;
+    
+    void init() {
+      better = new ArrayList<String>();
+      better.add("b");
+      better.add("e");
+      better.add("t");
+      better.add("r");
+  
+      betterNums = new ArrayList<Integer>();
+      betterNums.add(1);
+      betterNums.add(2);
+      betterNums.add(2);
+      betterNums.add(1); 
+  
+      result = new ArrayList<Boolean>();
+      result.add(false);
+      result.add(false);
+      result.add(true);
+      result.add(false);
+      result.add(true);
+      result.add(true);
+      result.add(true);
+      result.add(true);
+      result.add(true);
+      result.add(false);
+      result.add(false);
+      result.add(true);
+  
+      badResult = new ArrayList<Boolean>();
+      badResult.add(false);
+      badResult.add(false);
+      badResult.add(true);
+      
+      h = new Huffman(better, betterNums);
+    }
+    
+    void testBetterEncode(Tester t) {
+      init();
+      t.checkExpect(h.encode("better"), result);
+    }
+    
+    void testBetterDecode(Tester t) {
+      init();
+      // t.checkExpect(h.decode(badResult), "b?");
+    }
+  
+    void testBetterEncodeError(Tester t) {
+      init();
+      t.checkException(new IllegalArgumentException("Tried to encode u but that is "
+          + "not part of the language."), h, "encode", "butter");
+    }
+  }
+  
+  
+  
+  
+  
