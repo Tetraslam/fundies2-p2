@@ -133,7 +133,8 @@ class Node<T> extends ANode<T> {
 
   // void method to remove this node from the list
   public void removeSelfVoid() {
-    this.removeSelf();
+    this.prev.changeNext(this.next);
+    this.next.changePrev(this.prev);
   }
 }
 
