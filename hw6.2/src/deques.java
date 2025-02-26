@@ -302,6 +302,8 @@ class ExamplesDeques {
 
   void testRemoveNode(Tester t) {
     init();
+
+    // test that there is no change when trying to remove the sentinel
     Deque<String> placeholder = deque1;
     deque1.removeNode(deque1.header);
     t.checkExpect(deque1, placeholder);
@@ -310,6 +312,7 @@ class ExamplesDeques {
     deque2.removeNode(start);
     t.checkExpect(deque2, placeholder2);
 
+    // test that after removing bcd, there is no bcd in the list
     class Isbcd implements Predicate<String> {
       public boolean test(String s) {
         return s.equals("bcd");
