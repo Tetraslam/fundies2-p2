@@ -20,24 +20,32 @@ class Huffman {
         this.frequencies = frequencies;
     }
 
+    // encodes the message into a list of booleans
     public ArrayList<Boolean> encode(String message) {
+
+        // create a list of leaves to represent each letter in the alphabet and their frequencies
         ArrayList<ATree> leaves = new ArrayList<>();
         for (int i = 0; i < alphabet.size(); i++) {
             leaves.add(new Leaf(alphabet.get(i), frequencies.get(i)));
         }
 
+        // sort the leaves into a tree
         ATree leavesToTree = new ArrayListUtils().sort(leaves);
 
-        ArrayList<Boolean> encodedMessage = new ArrayList<>();
+        // encode the message
+        ArrayList<Boolean> encodedMessage = new ArrayList<Boolean>();
         for (int i = 0; i < message.length(); i++) {
             String letter = message.substring(i, i + 1);
-            encodedMessage = new ArrayListUtils().addCode(new ArrayList<Boolean>(), letter, leavesToTree);
+            encodedMessage = new ArrayListUtils().addCode(encodedMessage, letter, leavesToTree);
         }
         return encodedMessage;
     }
 }
 
+// utils class to have any ArrayList methods needed
 class ArrayListUtils {
+
+    // returns the list of leaves as a single sorted node
     ATree sort(ArrayList<ATree> leaves) {
         while (leaves.size() != 1) {
             ATree lowest = new ArrayListUtils().getLowest(leaves);
@@ -49,6 +57,7 @@ class ArrayListUtils {
         return leaves.get(0);
     }
 
+    // gets the lowest valued leaf in the list of leaves
     ATree getLowest(ArrayList<ATree> leaves) {
         ATree lowest = leaves.get(0);
         for (ATree leaf : leaves) {
@@ -59,12 +68,10 @@ class ArrayListUtils {
         return lowest;
     }
 
+    // adds the code for the letter to the encoded message so far
+    // uses helper method findPath to find the path to the letter through the tree
     ArrayList<Boolean> addCode(ArrayList<Boolean> encodedMessage, String letter, ATree tree) {
-        return new ArrayListUtils().getPath(letter, tree, new ArrayList<Boolean>());
-    }
-
-    ArrayList<Boolean> getPath(String letter, ATree tree, ArrayList<Boolean> boolsSoFar) {
-        return tree.findPath(letter, tree, boolsSoFar);
+        return tree.findPath(letter, tree, encodedMessage);
     }
     
 }
@@ -76,8 +83,10 @@ abstract class ATree {
         this.frequency = frequency;
     }
 
+    // finds path of letter through the tree and adds appropriate booleans to the list
     public abstract ArrayList<Boolean> findPath(String letter, ATree tree, ArrayList<Boolean> boolsSoFar);
 
+    // checks if the letter is in the tree
     public abstract boolean contains(String letter);
 }
 
@@ -89,14 +98,19 @@ class Leaf extends ATree {
         this.letter = letter;
     }
 
+    // base case for finding the path of the letter through the tree
+    // once we reach the actual letter, if it is contained in the tree, we return the list of booleans
     public ArrayList<Boolean> findPath(String letter, ATree tree, ArrayList<Boolean> boolsSoFar) {
         if (this.letter.equals(letter)) {
             return boolsSoFar;
         }
-        throw new IllegalArgumentException("Tried to encode " +  
-        letter + "but that is not part of the language.");
+        else {
+            throw new IllegalArgumentException("Tried to encode " +  
+            letter + "but that is not part of the language.");
+        }
     }
 
+    // returns if this leaf contains the letter
     public boolean contains(String letter) {
         return this.letter.equals(letter);
     }
@@ -112,20 +126,22 @@ class Node extends ATree {
         this.right = right;
     }
 
+    // finds the path of the letter through the tree
     public ArrayList<Boolean> findPath(String letter, ATree tree, ArrayList<Boolean> boolsSoFar) {
         if (this.left.contains(letter)) {
             boolsSoFar.add(false);
-            return new ArrayListUtils().getPath(letter, this.left, boolsSoFar);
+            return new ArrayListUtils().addCode(boolsSoFar, letter, this.left);
         }
         else if (this.right.contains(letter)) {
             boolsSoFar.add(true);
-            return new ArrayListUtils().getPath(letter, this.right, boolsSoFar);
+            return new ArrayListUtils().addCode(boolsSoFar, letter, this.right);
         }
 
         throw new IllegalArgumentException("Tried to encode " +  
         letter + "but that is not part of the language.");
     }
 
+    // returns if the letter is in the left or right part of the node
     public boolean contains(String letter) {
         return this.left.contains(letter) || this.right.contains(letter);
     }
