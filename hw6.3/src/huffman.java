@@ -54,52 +54,39 @@ class Huffman {
     // sort the leaves into a tree
     ATree huffmanTree = new ArrayListUtils().sort(leaves);
     
-    StringBuilder decodedMessage = new StringBuilder();
-    
-    // Special case: if the tree is just a leaf (single character alphabet)
-    if (huffmanTree instanceof Leaf) {
-      Leaf leaf = (Leaf) huffmanTree;
-      // Each bit represents one occurrence of the character
-      for (int i = 0; i < encodedMessage.size(); i++) {
-        decodedMessage.append(leaf.letter);
-      }
-      return decodedMessage.toString();
-    }
-    
+    String decodedMessage = "";
     ATree currentNode = huffmanTree;
     
-    // Process each bit in the encoded message
     for (int i = 0; i < encodedMessage.size(); i++) {
       Boolean bit = encodedMessage.get(i);
       
-      // Navigate the tree based on the bit
-      if (currentNode instanceof Node) {
-        Node node = (Node) currentNode;
-        currentNode = bit ? node.right : node.left;
+      if (currentNode.isLeaf()) {
+        // We're at a leaf, add its letter to the result
+        decodedMessage = decodedMessage + currentNode.getLetter();
         
-        // If we've reached a leaf, add its letter and reset to the root
-        if (currentNode instanceof Leaf) {
-          Leaf leaf = (Leaf) currentNode;
-          decodedMessage.append(leaf.letter);
-          
-          // If this was the last bit, we're done - no need to reset
-          if (i == encodedMessage.size() - 1) {
-            return decodedMessage.toString();
-          }
-          
-          currentNode = huffmanTree; // Reset to the root for the next bit
+        // Reset to root and process this same bit again
+        currentNode = huffmanTree;
+        i--; // Stay on same bit
+      } else {
+        // At an internal node, go left or right
+        if (bit) {
+          currentNode = currentNode.getRight();
+        } else {
+          currentNode = currentNode.getLeft();
         }
       }
     }
     
-    // If we get here and we're not at the root, 
-    // we have a partial message that didn't complete
-    // So we add "?" to indicate this
-    if (currentNode != huffmanTree) {
-      decodedMessage.append("?");
+    // If we've processed all bits but are still at a leaf, add that letter
+    if (currentNode.isLeaf()) {
+      decodedMessage = decodedMessage + currentNode.getLetter();
+    } 
+    // If we're not at the root or a leaf, add "?" to indicate incomplete traversal
+    else if (currentNode != huffmanTree) {
+      decodedMessage = decodedMessage + "?";
     }
     
-    return decodedMessage.toString();
+    return decodedMessage;
   }
 }
 
@@ -148,6 +135,18 @@ abstract class ATree {
 
   // checks if the letter is in the tree
   public abstract boolean contains(String letter);
+  
+  // Is this a leaf node?
+  public abstract boolean isLeaf();
+  
+  // Get the letter (only valid for leaf nodes)
+  public abstract String getLetter();
+  
+  // Get left child (only valid for nodes)
+  public abstract ATree getLeft();
+  
+  // Get right child (only valid for nodes)
+  public abstract ATree getRight();
 }
 
 class Leaf extends ATree {
@@ -173,6 +172,25 @@ class Leaf extends ATree {
   // returns if this leaf contains the letter
   public boolean contains(String letter) {
     return this.letter.equals(letter);
+  }
+  
+  // Yes, this is a leaf
+  public boolean isLeaf() {
+    return true;
+  }
+  
+  // Get the letter from this leaf
+  public String getLetter() {
+    return this.letter;
+  }
+  
+  // These methods should never be called on a leaf
+  public ATree getLeft() {
+    throw new UnsupportedOperationException("Cannot get left child of a leaf");
+  }
+  
+  public ATree getRight() {
+    throw new UnsupportedOperationException("Cannot get right child of a leaf");
   }
 }
 
@@ -204,6 +222,26 @@ class Node extends ATree {
   // returns if the letter is in the left or right part of the node
   public boolean contains(String letter) {
     return this.left.contains(letter) || this.right.contains(letter);
+  }
+  
+  // No, this is not a leaf
+  public boolean isLeaf() {
+    return false;
+  }
+  
+  // This method should never be called on a node
+  public String getLetter() {
+    throw new UnsupportedOperationException("Cannot get letter from a node");
+  }
+  
+  // Get the left child
+  public ATree getLeft() {
+    return this.left;
+  }
+  
+  // Get the right child
+  public ATree getRight() {
+    return this.right;
   }
 }
 
