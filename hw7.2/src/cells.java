@@ -40,13 +40,20 @@ class CellUtils {
 
   // returns the state of a child cell given the number and the states of the neighbors
   public int childState(int num, int leftState, int centerState, int rightState) {
+    // gets all the powers needed to represent the given number
     ArrayList<Integer> powers = new CellUtils().binaryBreakdown(num);
+    
+    // creates arraylist of integers to represent the binary value of the 3 cells
+    // we're looking at, which represent the power of 2
     ArrayList<Integer> toEvaluate = new ArrayList<Integer>();
     toEvaluate.add(leftState);
     toEvaluate.add(centerState);  
     toEvaluate.add(rightState);
 
+    // evaluates the binary value of the 3 cells to a base 10 value
     int evaluatedPower = new CellUtils().evaluateBinary(toEvaluate);
+    
+    // checks if the powers array contains the power evaluated from the cells
     if (powers.contains(evaluatedPower)) {
       return 1;
     } 
@@ -56,6 +63,7 @@ class CellUtils {
   }
 }
 
+// interface to represent all cells and define behavior
 interface ICell {
   // gets the state of this ICell
   int getState();
@@ -107,7 +115,7 @@ class InertCell extends ACell {
   }
 }
 
-// rule 60 cell class
+// class to represent rule 60 of cells 
 class Rule60 extends ACell {
   
   Rule60(int state) {
@@ -122,6 +130,7 @@ class Rule60 extends ACell {
   
 }
 
+// class to represent rule 30 of cells
 class Rule30 extends ACell {
   
   Rule30(int state) {
@@ -136,6 +145,7 @@ class Rule30 extends ACell {
   
 }
 
+// class to represent an array of cells, one generation of cells
 class CellArray {
   ArrayList<ICell> cells;
   
@@ -160,6 +170,7 @@ class CellArray {
     return new CellArray(newCells);
   }
 
+  // draws cell array, returns image
   public WorldImage draw(int cellWidth, int cellHeight) {
     WorldImage cells = new EmptyImage();
     for (ICell cell : this.cells) {
