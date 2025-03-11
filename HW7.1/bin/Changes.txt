@@ -1,41 +1,45 @@
-Changes to Data Definitions
+Changes to Sokoban Implementation
 
-1. Changes Made to Previous Data Definitions:
-   - Added a new IGroundType implementation for Hole
-   - Modified the Cell class to handle interactions with holes
-   - Added game state tracking for player falling into holes
-   - Implemented mechanics for objects disappearing when falling into holes
-   - Added a distinction between winning and losing game states
+The original Sokoban implementation was modified to meet several requirements. Here are the key changes made:
 
-2. If We Had Known About Holes:
-   Our original design actually accommodated this change fairly well because:
-   - We separated ground types from cell contents, making it easy to add new ground types
-   - We implemented proper interactions between elements
-   - Our movement logic was already handling special cases
+1. Removal of Enums:
+   - Converted Direction and GameColor enums to classes with string fields
+   - Added equals/hashCode methods for proper equality comparison
+   - Created factory classes (DirectionFactory, GameColorFactory) to manage instances
 
-   However, we would have:
-   - Designed the cell interaction system with more generic "special effect" handling
-   - Created a more comprehensive event system for tracking game state changes
-   - Added more abstraction for the "disappearing" mechanics
+2. Type-Safe Runtime Type Checking:
+   - Removed all instanceof checks and casting operations
+   - Added isEmptyGround(), isHoleGround(), etc. methods to IGroundType
+   - Added isEmptyContent(), isWallContent(), etc. methods to ICellContent
+   - Updated all type checks to use these methods instead
 
-3. Accommodating Future Changes:
-   Our revised data definitions are now more extensible:
-   - The separation between ground types and cell contents allows adding new types easily
-   - The interaction system is now event-based rather than hardcoded for specific types
-   - The rendering system is decoupled from the game logic
-   - New special cell behaviors can be added by implementing the appropriate interfaces
-   - The level construction from strings can be extended with new character mappings
+3. ArrayList Usage:
+   - Removed all array usages (String[], etc.)
+   - Added stringToList helper method to convert string arrays to ArrayLists
+   - Used proper generic types for all collections
 
-   For future enhancements like:
-   - Ice tiles (that make the player slide)
-   - Teleporters
-   - Multi-level puzzles
-   - Timed challenges
+4. Improved Error Handling:
+   - Changed getCell and setCell to throw exceptions for out-of-bounds access
+   - Added proper boundary checks before accessing cells
+   - Added isOutOfBounds helper method for position validation
+   - Added try-catch blocks for robust error handling
 
-   We would only need to:
-   - Add new implementations of IGroundType or ICellContent
-   - Extend the interaction logic in the SokobanLevel class
-   - Add new character mappings for level construction
-   - Implement any new rendering for the new elements
+5. Object Behavior Changes:
+   - Made trophies on targets still movable
+   - Fixed checkWin logic to properly check all targets
+   - Added handling for objects on holes at level construction
+   - Made objects disappear when placed on holes during initialization
+   - Corrected player position tracking when player falls in hole at construction
 
-   The core architecture is now flexible enough to accommodate these changes without major restructuring.
+6. Image Scaling:
+   - Added ScaleImageXY for all images to handle 120x120 px images
+   - Scaled to 40x40 px (cell size) using 40.0/120.0 scale factor
+
+7. Testing:
+   - Added specific tests for boundary conditions
+   - Added tests for object-on-hole initialization
+   - Added tests for trophy-on-target movability
+   - Added tests for exception handling
+   - Added tests for helper methods (stringToList, etc.)
+
+These changes make the code more robust while maintaining all functionality. The updated code follows best practices for object-oriented design by avoiding type casting and using proper interfaces and type-checking methods.

@@ -1,42 +1,34 @@
-Merging Design Document
+Merging Sokoban Code
 
-When merging our two implementations, we focused on combining the strongest aspects of each design while ensuring maintainability and extensibility.
+In this assignment, we merged the Sokoban game implementation into two main files:
 
-Similarities:
-- Both implementations used a grid-based board representation
-- Both had a clear separation between ground elements and cell contents
-- Both supported player movement and basic trophy/target mechanics
+1. Sokoban.java - Contains all the game logic and implementation classes
+2. ExamplesSokoban.java - Contains all the tests for the game
 
-Differences:
-- Implementation A used a functional approach with immutable data structures
-- Implementation B used a mutable approach with ArrayList for better performance
-- Implementation A had more rigorous testing but slower performance
-- Implementation B had better rendering and UI but less robust error handling
+The merge required careful handling of dependencies between classes. Here's how we approached it:
 
-Decisions:
-1. We chose the mutable approach using ArrayList from Implementation B because:
-   - It offers better performance for large game boards
-   - It simplifies the implementation of game mechanics
-   - It makes the code more readable for future extensions
+1. Class Structure:
+   - Replaced enums (Direction, GameColor) with proper classes that use string fields
+   - Created type-checking methods to avoid instanceof and casting
+   - Added factory classes for Direction and GameColor to ensure consistent instances
+   - Added a Utils class for methods that don't belong to specific objects
 
-2. We kept the clear separation between ground types and cell contents from both implementations:
-   - This allows easy addition of new elements like holes
-   - It maintains the ability to have elements on top of other elements (e.g., trophies on targets)
+2. Interface Organization:
+   - IGroundType interface with implementations: EmptyGround, Target, Hole
+   - ICellContent interface with implementations: EmptyContent, Wall, Crate, Trophy, Player
+   - Each interface has type-checking methods to avoid instanceof checks
 
-3. We enhanced the error handling from Implementation A:
-   - Better validation of level strings
-   - Comprehensive checking of game rules and constraints
+3. Dependency Handling:
+   - Factory classes (DirectionFactory, GameColorFactory) to create and reuse objects
+   - Cell class that composes IGroundType and ICellContent
+   - SokobanLevel class that manages the game board and player movement
+   - SokobanWorld class that handles rendering and input
 
-4. We improved the rendering and UI from Implementation B:
-   - Cleaner visual representation
-   - Better game state feedback
+4. Helper Methods:
+   - Added stringToList to convert string arrays to ArrayLists
+   - Added isOutOfBounds to check position validity before cell access
+   - Enhanced error handling for positions outside the board
 
-5. We combined the testing approaches from both:
-   - Comprehensive unit tests for core mechanisms
-   - Integration tests for complete game flows
+The most challenging aspect was making sure all the dependencies were properly initialized in a way that avoids null pointers while following the restrictions of not using static fields/methods. The factory pattern helped address this by providing consistent instances of objects.
 
-Changes to Previous Designs:
-1. Switched from Funworld to Impworld for better control of game state
-2. Enhanced data structures to allow for extension with new tile types
-3. Implemented a more robust position system for tracking game elements
-4. Improved level loading from string representations
+For game logic, we had to carefully track state between moves and ensure proper handling of special cases like trophies on targets, objects falling into holes, and boundary checks when pushing objects.

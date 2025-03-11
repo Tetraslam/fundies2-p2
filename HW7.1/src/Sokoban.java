@@ -5,74 +5,51 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 // Represents cardinal directions
-enum Direction {
-  UP, DOWN, LEFT, RIGHT;
+class Direction {
+  String direction;
+
+  Direction(String direction) {
+    this.direction = direction;
+  }
 
   // Returns a position offset based on this direction
   public Posn getOffset() {
-    switch (this) {
-      case UP:
+    switch (this.direction) {
+      case "UP":
         return new Posn(0, -1);
-      case DOWN:
+      case "DOWN":
         return new Posn(0, 1);
-      case LEFT:
+      case "LEFT":
         return new Posn(-1, 0);
-      case RIGHT:
+      case "RIGHT":
         return new Posn(1, 0);
       default:
         return new Posn(0, 0);
     }
   }
-
-  // Returns the character representation for this direction
-  public char toChar() {
-    switch (this) {
-      case UP:
-        return '^';
-      case DOWN:
-        return 'v';
-      case LEFT:
-        return '<';
-      case RIGHT:
-        return '>';
-      default:
-        return ' ';
-    }
-  }
-
-  // Creates a direction from a character
-  public static Direction fromChar(char c) {
-    switch (c) {
-      case '^':
-        return UP;
-      case 'v':
-        return DOWN;
-      case '<':
-        return LEFT;
-      case '>':
-        return RIGHT;
-      default:
-        throw new IllegalArgumentException("Invalid direction character: " + c);
-    }
-  }
 }
 
+
 // Represents colors for targets and trophies
-enum GameColor {
-  RED, GREEN, BLUE, YELLOW;
+class GameColor {
+  String color;
+
+  GameColor(String color) {
+    this.color = color;
+  }
 
   // Returns the AWT color for this game color
   public Color toAWTColor() {
-    if (this == RED) {
+    if (this.color == "RED") {
       return Color.RED;
     }
-    else if (this == GREEN) {
+    else if (this.color == "GREEN") {
       return Color.GREEN;
     }
-    else if (this == BLUE) {
+    else if (this.color == "BLUE") {
       return Color.BLUE;
     }
-    else if (this == YELLOW) {
+    else if (this.color == "YELLOW") {
       return Color.YELLOW;
     }
     else {
@@ -82,14 +59,14 @@ enum GameColor {
 
   // Returns the character representation for this color (uppercase for target)
   public char toTargetChar() {
-    switch (this) {
-      case RED:
+    switch (this.color) {
+      case "RED":
         return 'R';
-      case GREEN:
+      case "GREEN":
         return 'G';
-      case BLUE:
+      case "BLUE":
         return 'B';
-      case YELLOW:
+      case "YELLOW":
         return 'Y';
       default:
         return ' ';
@@ -98,52 +75,20 @@ enum GameColor {
 
   // Returns the character representation for this color (lowercase for trophy)
   public char toTrophyChar() {
-    switch (this) {
-      case RED:
+    switch (this.color) {
+      case "RED":
         return 'r';
-      case GREEN:
+      case "GREEN":
         return 'g';
-      case BLUE:
+      case "BLUE":
         return 'b';
-      case YELLOW:
+      case "YELLOW":
         return 'y';
       default:
         return ' ';
     }
-  }
-
-  // Creates a color from a target character
-  public static GameColor fromTargetChar(char c) {
-    switch (c) {
-      case 'R':
-        return RED;
-      case 'G':
-        return GREEN;
-      case 'B':
-        return BLUE;
-      case 'Y':
-        return YELLOW;
-      default:
-        throw new IllegalArgumentException("Invalid target color character: " + c);
-    }
-  }
-
-  // Creates a color from a trophy character
-  public static GameColor fromTrophyChar(char c) {
-    switch (c) {
-      case 'r':
-        return RED;
-      case 'g':
-        return GREEN;
-      case 'b':
-        return BLUE;
-      case 'y':
-        return YELLOW;
-      default:
-        throw new IllegalArgumentException("Invalid trophy color character: " + c);
-    }
-  }
 }
+
 
 // Represents a ground type in the game
 interface IGroundType {
@@ -158,9 +103,6 @@ interface IGroundType {
 
   // Returns true if this ground is a hole
   boolean isHole();
-
-  // Returns the character representation for this ground type
-  char toChar();
 }
 
 // Represents an empty ground
@@ -179,10 +121,6 @@ class EmptyGround implements IGroundType {
 
   public boolean isHole() {
     return false;
-  }
-
-  public char toChar() {
-    return '_';
   }
 }
 
@@ -210,10 +148,6 @@ class Target implements IGroundType {
   public boolean isHole() {
     return false;
   }
-
-  public char toChar() {
-    return this.color.toTargetChar();
-  }
 }
 
 // Represents a hole in the ground
@@ -238,10 +172,6 @@ class Hole implements IGroundType {
   public boolean isHole() {
     return true;
   }
-
-  public char toChar() {
-    return 'H';
-  }
 }
 
 // Represents a content of a cell
@@ -260,9 +190,6 @@ interface ICellContent {
 
   // Returns true if this content is a player
   boolean isPlayer();
-
-  // Returns the character representation for this content
-  char toChar();
 }
 
 // Represents empty cell content
@@ -285,10 +212,6 @@ class EmptyContent implements ICellContent {
 
   public boolean isPlayer() {
     return false;
-  }
-
-  public char toChar() {
-    return ' ';
   }
 }
 
@@ -315,10 +238,6 @@ class Wall implements ICellContent {
   public boolean isPlayer() {
     return false;
   }
-
-  public char toChar() {
-    return 'W';
-  }
 }
 
 // Represents a crate
@@ -343,10 +262,6 @@ class Crate implements ICellContent {
 
   public boolean isPlayer() {
     return false;
-  }
-
-  public char toChar() {
-    return 'B';
   }
 }
 
@@ -382,10 +297,6 @@ class Trophy implements ICellContent {
   public boolean isPlayer() {
     return false;
   }
-
-  public char toChar() {
-    return this.color.toTrophyChar();
-  }
 }
 
 // Represents the player
@@ -416,10 +327,6 @@ class Player implements ICellContent {
 
   public boolean isPlayer() {
     return true;
-  }
-
-  public char toChar() {
-    return this.facing.toChar();
   }
 
   // Returns a new player facing the given direction
@@ -802,31 +709,30 @@ class SokobanWorld extends World {
       this.level.movePlayer(dir);
     }
   }
-
 }
 
 // Main class for running Sokoban
 class Sokoban {
-  static String introLevelGround = "________\n" + "_R______\n" + "________\n" + "_B____G_\n"
+  String introLevelGround = "________\n" + "_R______\n" + "________\n" + "_B____G_\n"
       + "________\n" + "___Y____\n" + "________";
 
-  static String introLevelContents = "__WWW___\n" + "__W>WW__\n" + "WWW__WWW\n" + "W_bg__rW\n"
+  String introLevelContents = "__WWW___\n" + "__W>WW__\n" + "WWW__WWW\n" + "W_bg__rW\n"
       + "WWyWWWWW\n" + "_WW_W___\n" + "__WWW___";
 
-  static String holeLevelGround = "________\n" + "________\n" + "__H_____\n" + "_RHHR___\n"
+  String holeLevelGround = "________\n" + "________\n" + "__H_____\n" + "_RHHR___\n"
       + "________\n" + "________\n" + "________";
 
-  static String holeLevelContents = "WWWWWWWW\n" + "W______W\n" + "W_>____W\n" + "W_r____W\n"
+  String holeLevelContents = "WWWWWWWW\n" + "W______W\n" + "W_>____W\n" + "W_r____W\n"
       + "W______W\n" + "WWWWWWWW\n" + "________";
 
-  public static boolean runIntroLevel(Tester t) {
+  public boolean runIntroLevel(Tester t) {
     SokobanLevel level = new SokobanLevel(introLevelGround, introLevelContents);
     SokobanWorld world = new SokobanWorld(level, 400, 400);
     world.bigBang(400, 400, 0.1);
     return true;
   }
 
-  public static boolean runHoleLevel(Tester t) {
+  public boolean runHoleLevel(Tester t) {
     SokobanLevel level = new SokobanLevel(holeLevelGround, holeLevelContents);
     SokobanWorld world = new SokobanWorld(level, 400, 400);
     world.bigBang(400, 400, 0.1);
