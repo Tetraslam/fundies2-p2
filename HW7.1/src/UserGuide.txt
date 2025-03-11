@@ -1,0 +1,32 @@
+Sokoban Game - User Guide
+
+Game Objective:
+The goal of Sokoban is to push all colored trophies onto their matching colored targets.
+For example, red trophies must go on red targets, blue on blue, etc.
+
+Controls:
+- Use arrow keys to move the player (Up, Down, Left, Right)
+- The player can only move in four directions (no diagonals)
+
+Game Rules:
+1. The player cannot walk through walls
+2. The player can push one trophy or crate at a time
+3. The player cannot push two or more items at once
+4. Items can be pushed onto targets
+5. The game is won when all colored trophies are on their matching targets
+
+Special Elements:
+- Holes: If a player or any pushable item falls into a hole, both the item and hole disappear
+- Warning: If the player falls into a hole, the game ends in failure!
+
+Tips:
+- Plan your moves carefully - it's easy to push trophies into positions where they can't be moved
+- Be especially careful around holes
+- Think about the order of moving trophies - sometimes you need to move one trophy to make way for another
+
+Advanced Strategy:
+- Try to clear a path to targets first
+- Work from the back of the puzzle toward the front
+- Sometimes you need to temporarily move a trophy away from its target to allow other trophies to pass
+
+Good luck!

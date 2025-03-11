@@ -1,0 +1,42 @@
+Merging Design Document
+
+When merging our two implementations, we focused on combining the strongest aspects of each design while ensuring maintainability and extensibility.
+
+Similarities:
+- Both implementations used a grid-based board representation
+- Both had a clear separation between ground elements and cell contents
+- Both supported player movement and basic trophy/target mechanics
+
+Differences:
+- Implementation A used a functional approach with immutable data structures
+- Implementation B used a mutable approach with ArrayList for better performance
+- Implementation A had more rigorous testing but slower performance
+- Implementation B had better rendering and UI but less robust error handling
+
+Decisions:
+1. We chose the mutable approach using ArrayList from Implementation B because:
+   - It offers better performance for large game boards
+   - It simplifies the implementation of game mechanics
+   - It makes the code more readable for future extensions
+
+2. We kept the clear separation between ground types and cell contents from both implementations:
+   - This allows easy addition of new elements like holes
+   - It maintains the ability to have elements on top of other elements (e.g., trophies on targets)
+
+3. We enhanced the error handling from Implementation A:
+   - Better validation of level strings
+   - Comprehensive checking of game rules and constraints
+
+4. We improved the rendering and UI from Implementation B:
+   - Cleaner visual representation
+   - Better game state feedback
+
+5. We combined the testing approaches from both:
+   - Comprehensive unit tests for core mechanisms
+   - Integration tests for complete game flows
+
+Changes to Previous Designs:
+1. Switched from Funworld to Impworld for better control of game state
+2. Enhanced data structures to allow for extension with new tile types
+3. Implemented a more robust position system for tracking game elements
+4. Improved level loading from string representations
