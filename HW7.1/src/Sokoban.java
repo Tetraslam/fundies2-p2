@@ -4,52 +4,165 @@ import javalib.worldimages.*;
 import java.awt.Color;
 import java.util.ArrayList;
 
-// Represents cardinal directions
-class Direction {
-  String direction;
-
-  Direction(String direction) {
-    this.direction = direction;
+// Utility methods that don't belong to a specific object
+class Utils {
+  // Converts a character to a ground type
+  IGroundType charToGround(char c) {
+    if (c == '_') {
+      return new EmptyGround();
+    }
+    else if (c == 'H') {
+      return new Hole();
+    }
+    else if (c == 'R') {
+      return new Target(new GameColor("RED"));
+    }
+    else if (c == 'G') {
+      return new Target(new GameColor("GREEN"));
+    }
+    else if (c == 'B') {
+      return new Target(new GameColor("BLUE"));
+    }
+    else if (c == 'Y') {
+      return new Target(new GameColor("YELLOW"));
+    }
+    else {
+      throw new IllegalArgumentException("Invalid ground character: " + c);
+    }
   }
 
-  // Returns a position offset based on this direction
-  public Posn getOffset() {
-    switch (this.direction) {
-      case "UP":
-        return new Posn(0, -1);
-      case "DOWN":
-        return new Posn(0, 1);
-      case "LEFT":
-        return new Posn(-1, 0);
-      case "RIGHT":
-        return new Posn(1, 0);
-      default:
-        return new Posn(0, 0);
+  // Converts a character to a cell content
+  ICellContent charToContent(char c) {
+    if (c == ' ') {
+      return new EmptyContent();
     }
+    else if (c == '_') {
+      return new EmptyContent(); // Handle underscore as empty
+    }
+    else if (c == 'W') {
+      return new Wall();
+    }
+    else if (c == 'B') {
+      return new Crate();
+    }
+    else if (c == 'r') {
+      return new Trophy(new GameColor("RED"));
+    }
+    else if (c == 'g') {
+      return new Trophy(new GameColor("GREEN"));
+    }
+    else if (c == 'b') {
+      return new Trophy(new GameColor("BLUE"));
+    }
+    else if (c == 'y') {
+      return new Trophy(new GameColor("YELLOW"));
+    }
+    else if (c == '^') {
+      return new Player(new Direction("UP"));
+    }
+    else if (c == 'v') {
+      return new Player(new Direction("DOWN"));
+    }
+    else if (c == '<') {
+      return new Player(new Direction("LEFT"));
+    }
+    else if (c == '>') {
+      return new Player(new Direction("RIGHT"));
+    }
+    else {
+      throw new IllegalArgumentException("Invalid content character: " + c);
+    }
+  }
+  
+  // Custom split method to avoid using arrays
+  ArrayList<String> customSplit(String str, char delimiter) {
+    ArrayList<String> result = new ArrayList<String>();
+    StringBuilder currentStr = new StringBuilder();
+    
+    for (int i = 0; i < str.length(); i++) {
+      char c = str.charAt(i);
+      if (c == delimiter) {
+        result.add(currentStr.toString());
+        currentStr = new StringBuilder();
+      } else {
+        currentStr.append(c);
+      }
+    }
+    
+    // Don't forget to add the last part
+    result.add(currentStr.toString());
+    
+    return result;
   }
 }
 
+// Represents cardinal directions (replaces enum)
+class Direction {
+  String name;
+  
+  Direction(String name) {
+    this.name = name;
+  }
+  
+  // Returns a position offset based on this direction
+  Posn getOffset() {
+    if (this.name.equals("UP")) {
+      return new Posn(0, -1);
+    }
+    else if (this.name.equals("DOWN")) {
+      return new Posn(0, 1);
+    }
+    else if (this.name.equals("LEFT")) {
+      return new Posn(-1, 0);
+    }
+    else if (this.name.equals("RIGHT")) {
+      return new Posn(1, 0);
+    }
+    else {
+      return new Posn(0, 0);
+    }
+  }
+  
+  // Needed for proper equality testing
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Direction)) {
+      return false;
+    }
+    
+    return this.sameName((Direction)obj);
+  }
+  
+  // Helper method to compare directions without casting in parameter
+  boolean sameName(Direction other) {
+    return this.name.equals(other.name);
+  }
+  
+  // Always override hashCode when overriding equals
+  public int hashCode() {
+    return this.name.hashCode();
+  }
+}
 
-// Represents colors for targets and trophies
+// Represents colors for targets and trophies (replaces enum)
 class GameColor {
-  String color;
-
-  GameColor(String color) {
-    this.color = color;
+  String name;
+  
+  GameColor(String name) {
+    this.name = name;
   }
 
   // Returns the AWT color for this game color
-  public Color toAWTColor() {
-    if (this.color == "RED") {
+  Color toAWTColor() {
+    if (this.name.equals("RED")) {
       return Color.RED;
     }
-    else if (this.color == "GREEN") {
+    else if (this.name.equals("GREEN")) {
       return Color.GREEN;
     }
-    else if (this.color == "BLUE") {
+    else if (this.name.equals("BLUE")) {
       return Color.BLUE;
     }
-    else if (this.color == "YELLOW") {
+    else if (this.name.equals("YELLOW")) {
       return Color.YELLOW;
     }
     else {
@@ -58,37 +171,67 @@ class GameColor {
   }
 
   // Returns the character representation for this color (uppercase for target)
-  public char toTargetChar() {
-    switch (this.color) {
-      case "RED":
-        return 'R';
-      case "GREEN":
-        return 'G';
-      case "BLUE":
-        return 'B';
-      case "YELLOW":
-        return 'Y';
-      default:
-        return ' ';
+  char toTargetChar() {
+    if (this.name.equals("RED")) {
+      return 'R';
+    }
+    else if (this.name.equals("GREEN")) {
+      return 'G';
+    }
+    else if (this.name.equals("BLUE")) {
+      return 'B';
+    }
+    else if (this.name.equals("YELLOW")) {
+      return 'Y';
+    }
+    else {
+      return ' ';
     }
   }
 
   // Returns the character representation for this color (lowercase for trophy)
-  public char toTrophyChar() {
-    switch (this.color) {
-      case "RED":
-        return 'r';
-      case "GREEN":
-        return 'g';
-      case "BLUE":
-        return 'b';
-      case "YELLOW":
-        return 'y';
-      default:
-        return ' ';
+  char toTrophyChar() {
+    if (this.name.equals("RED")) {
+      return 'r';
     }
+    else if (this.name.equals("GREEN")) {
+      return 'g';
+    }
+    else if (this.name.equals("BLUE")) {
+      return 'b';
+    }
+    else if (this.name.equals("YELLOW")) {
+      return 'y';
+    }
+    else {
+      return ' ';
+    }
+  }
+  
+  // Needed for proper equality testing
+  public boolean equals(Object obj) {
+    if (!(obj instanceof GameColor)) {
+      return false;
+    }
+    
+    return this.sameName((GameColor)obj);
+  }
+  
+  // Helper method to compare colors without casting in parameter
+  boolean sameName(GameColor other) {
+    return this.name.equals(other.name);
+  }
+  
+  // Always override hashCode when overriding equals
+  public int hashCode() {
+    return this.name.hashCode();
+  }
+  
+  // Convert to lowercase for filename purposes
+  public String toString() {
+    return this.name.toLowerCase();
+  }
 }
-
 
 // Represents a ground type in the game
 interface IGroundType {
@@ -103,6 +246,13 @@ interface IGroundType {
 
   // Returns true if this ground is a hole
   boolean isHole();
+  
+  // Type checking methods
+  boolean isEmptyGround();
+  
+  boolean isTargetGround();
+  
+  boolean isHoleGround();
 }
 
 // Represents an empty ground
@@ -122,6 +272,18 @@ class EmptyGround implements IGroundType {
   public boolean isHole() {
     return false;
   }
+  
+  public boolean isEmptyGround() {
+    return true;
+  }
+  
+  public boolean isTargetGround() {
+    return false;
+  }
+  
+  public boolean isHoleGround() {
+    return false;
+  }
 }
 
 // Represents a colored target
@@ -133,8 +295,8 @@ class Target implements IGroundType {
   }
 
   public WorldImage render() {
-    return new OverlayImage(new CircleImage(15, OutlineMode.OUTLINE, color.toAWTColor()),
-        new CircleImage(10, OutlineMode.SOLID, color.toAWTColor()));
+    return new OverlayImage(new CircleImage(15, OutlineMode.OUTLINE, this.color.toAWTColor()),
+        new CircleImage(10, OutlineMode.SOLID, this.color.toAWTColor()));
   }
 
   public boolean isTarget() {
@@ -148,17 +310,28 @@ class Target implements IGroundType {
   public boolean isHole() {
     return false;
   }
+  
+  public boolean isEmptyGround() {
+    return false;
+  }
+  
+  public boolean isTargetGround() {
+    return true;
+  }
+  
+  public boolean isHoleGround() {
+    return false;
+  }
 }
 
 // Represents a hole in the ground
 class Hole implements IGroundType {
   public WorldImage render() {
-    return new FromFileImage("src/hole.png");
-    // Alternative if image not available:
-    // return new OverlayImage(
-    // new CircleImage(15, OutlineMode.SOLID, Color.BLACK),
-    // new CircleImage(20, OutlineMode.OUTLINE, new Color(0, 200, 0))
-    // );
+    return new ScaleImageXY(
+      new FromFileImage("src/hole.png"),
+      40.0 / 120.0,
+      40.0 / 120.0
+    );
   }
 
   public boolean isTarget() {
@@ -170,6 +343,18 @@ class Hole implements IGroundType {
   }
 
   public boolean isHole() {
+    return true;
+  }
+  
+  public boolean isEmptyGround() {
+    return false;
+  }
+  
+  public boolean isTargetGround() {
+    return false;
+  }
+  
+  public boolean isHoleGround() {
     return true;
   }
 }
@@ -190,6 +375,17 @@ interface ICellContent {
 
   // Returns true if this content is a player
   boolean isPlayer();
+  
+  // Type checking methods
+  boolean isEmptyContent();
+  
+  boolean isWallContent();
+  
+  boolean isCrateContent();
+  
+  boolean isTrophyContent();
+  
+  boolean isPlayerContent();
 }
 
 // Represents empty cell content
@@ -213,14 +409,36 @@ class EmptyContent implements ICellContent {
   public boolean isPlayer() {
     return false;
   }
+  
+  public boolean isEmptyContent() {
+    return true;
+  }
+  
+  public boolean isWallContent() {
+    return false;
+  }
+  
+  public boolean isCrateContent() {
+    return false;
+  }
+  
+  public boolean isTrophyContent() {
+    return false;
+  }
+  
+  public boolean isPlayerContent() {
+    return false;
+  }
 }
 
 // Represents a wall
 class Wall implements ICellContent {
   public WorldImage render() {
-    return new FromFileImage("src/wall.png");
-    // Alternative if image not available:
-    // return new RectangleImage(40, 40, OutlineMode.SOLID, new Color(165, 42, 42));
+    return new ScaleImageXY(
+      new FromFileImage("src/wall.png"),
+      40.0 / 120.0,
+      40.0 / 120.0
+    );
   }
 
   public boolean isMovable() {
@@ -238,14 +456,36 @@ class Wall implements ICellContent {
   public boolean isPlayer() {
     return false;
   }
+  
+  public boolean isEmptyContent() {
+    return false;
+  }
+  
+  public boolean isWallContent() {
+    return true;
+  }
+  
+  public boolean isCrateContent() {
+    return false;
+  }
+  
+  public boolean isTrophyContent() {
+    return false;
+  }
+  
+  public boolean isPlayerContent() {
+    return false;
+  }
 }
 
 // Represents a crate
 class Crate implements ICellContent {
   public WorldImage render() {
-    return new FromFileImage("src/crate.png");
-    // Alternative if image not available:
-    // return new RectangleImage(30, 30, OutlineMode.SOLID, new Color(139, 69, 19));
+    return new ScaleImageXY(
+      new FromFileImage("src/crate.png"),
+      40.0 / 120.0,
+      40.0 / 120.0
+    );
   }
 
   public boolean isMovable() {
@@ -263,6 +503,26 @@ class Crate implements ICellContent {
   public boolean isPlayer() {
     return false;
   }
+  
+  public boolean isEmptyContent() {
+    return false;
+  }
+  
+  public boolean isWallContent() {
+    return false;
+  }
+  
+  public boolean isCrateContent() {
+    return true;
+  }
+  
+  public boolean isTrophyContent() {
+    return false;
+  }
+  
+  public boolean isPlayerContent() {
+    return false;
+  }
 }
 
 // Represents a trophy
@@ -274,12 +534,11 @@ class Trophy implements ICellContent {
   }
 
   public WorldImage render() {
-    return new FromFileImage("src/" + this.color.toString().toLowerCase() + "_trophy.png");
-    // Alternative if image not available:
-    // return new OverlayImage(
-    // new TextImage("🏆", 20, this.color.toAWTColor()),
-    // new RectangleImage(30, 30, OutlineMode.SOLID, Color.WHITE)
-    // );
+    return new ScaleImageXY(
+      new FromFileImage("src/" + this.color.toString() + "_trophy.png"),
+      40.0 / 120.0,
+      40.0 / 120.0
+    );
   }
 
   public boolean isMovable() {
@@ -297,6 +556,26 @@ class Trophy implements ICellContent {
   public boolean isPlayer() {
     return false;
   }
+  
+  public boolean isEmptyContent() {
+    return false;
+  }
+  
+  public boolean isWallContent() {
+    return false;
+  }
+  
+  public boolean isCrateContent() {
+    return false;
+  }
+  
+  public boolean isTrophyContent() {
+    return true;
+  }
+  
+  public boolean isPlayerContent() {
+    return false;
+  }
 }
 
 // Represents the player
@@ -308,9 +587,11 @@ class Player implements ICellContent {
   }
 
   public WorldImage render() {
-    return new FromFileImage("src/player.png");
-    // Alternative if image not available:
-    // return new TextImage("🧍", 30, Color.BLACK);
+    return new ScaleImageXY(
+      new FromFileImage("src/player.png"),
+      40.0 / 120.0,
+      40.0 / 120.0
+    );
   }
 
   public boolean isMovable() {
@@ -330,14 +611,32 @@ class Player implements ICellContent {
   }
 
   // Returns a new player facing the given direction
-  public Player withDirection(Direction dir) {
+  Player withDirection(Direction dir) {
     return new Player(dir);
+  }
+  
+  public boolean isEmptyContent() {
+    return false;
+  }
+  
+  public boolean isWallContent() {
+    return false;
+  }
+  
+  public boolean isCrateContent() {
+    return false;
+  }
+  
+  public boolean isTrophyContent() {
+    return false;
+  }
+  
+  public boolean isPlayerContent() {
+    return true;
   }
 }
 
-//…[imports and enums unchanged]…
-
-//Represents a cell in the game
+// Represents a cell in the game
 class Cell {
   IGroundType ground;
   ICellContent content;
@@ -364,33 +663,33 @@ class Cell {
 
   // Returns true if this cell is empty (no content)
   boolean isEmpty() {
-    return this.content instanceof EmptyContent;
+    return this.content.isEmptyContent();
   }
 
   // Returns true if this cell has a movable content
   boolean hasMovableContent() {
-    return this.content.isMovable() && !this.hasTrophyOnMatchingTarget();
+    return this.content.isMovable();
   }
 
   // Returns true if this cell contains the player
   boolean hasPlayer() {
-    return this.content.isPlayer();
+    return this.content.isPlayerContent();
   }
 
   // Returns true if this cell contains a trophy
   boolean hasTrophy() {
-    return this.content.isTrophy();
+    return this.content.isTrophyContent();
   }
 
   // Returns true if this cell has a matching trophy on target
   boolean hasTrophyOnMatchingTarget() {
-    return this.ground.isTarget() && this.content.isTrophy()
-        && this.ground.getColor() == this.content.getColor();
+    return this.ground.isTarget() && this.content.isTrophyContent()
+        && this.ground.getColor().equals(this.content.getColor());
   }
 
   // Returns true if this cell is a hole
   boolean isHole() {
-    return this.ground.isHole();
+    return this.ground.isHoleGround();
   }
 
   // Renders this cell as an image
@@ -405,41 +704,53 @@ class SokobanLevel {
   Posn playerPos;
   boolean gameOver;
   boolean playerFell;
+  Utils utils;
 
   // Constructs a level from ground and content strings
   SokobanLevel(String groundStr, String contentStr) {
-    String[] groundRows = groundStr.split("\n");
-    String[] contentRows = contentStr.split("\n");
+    this.utils = new Utils();
+    ArrayList<String> groundRows = this.utils.customSplit(groundStr, '\n');
+    ArrayList<String> contentRows = this.utils.customSplit(contentStr, '\n');
 
-    if (groundRows.length != contentRows.length) {
+    if (groundRows.size() != contentRows.size()) {
       throw new IllegalArgumentException("Ground and content must have same number of rows");
     }
 
-    this.board = new ArrayList<>();
+    this.board = new ArrayList<ArrayList<Cell>>();
     this.playerPos = null;
     this.gameOver = false;
     this.playerFell = false;
 
-    for (int y = 0; y < groundRows.length; y++) {
-      String groundRow = groundRows[y];
-      String contentRow = contentRows[y];
+    for (int y = 0; y < groundRows.size(); y++) {
+      String groundRow = groundRows.get(y);
+      String contentRow = contentRows.get(y);
 
       if (groundRow.length() != contentRow.length()) {
         throw new IllegalArgumentException("Row " + y + " has mismatched lengths");
       }
 
-      ArrayList<Cell> row = new ArrayList<>();
+      ArrayList<Cell> row = new ArrayList<Cell>();
 
       for (int x = 0; x < groundRow.length(); x++) {
         char groundChar = groundRow.charAt(x);
         char contentChar = contentRow.charAt(x);
 
-        IGroundType ground = charToGround(groundChar);
-        ICellContent content = charToContent(contentChar);
+        IGroundType ground = this.utils.charToGround(groundChar);
+        ICellContent content = this.utils.charToContent(contentChar);
+
+        // If content is placed on a hole, it disappears (become empty)
+        if (ground.isHoleGround() && content.isPlayerContent()) {
+          content = new EmptyContent();
+          this.playerFell = true;
+          this.gameOver = true;
+        }
+        else if (ground.isHoleGround() && !content.isEmptyContent() && !content.isWallContent()) {
+          content = new EmptyContent();
+        }
 
         row.add(new Cell(ground, content));
 
-        if (content.isPlayer()) {
+        if (content.isPlayerContent()) {
           if (this.playerPos != null) {
             throw new IllegalArgumentException("Multiple players in level");
           }
@@ -450,193 +761,172 @@ class SokobanLevel {
       this.board.add(row);
     }
 
-    if (this.playerPos == null) {
+    if (this.playerPos == null && !this.playerFell) {
       throw new IllegalArgumentException("No player in level");
     }
   }
 
-  // Converts a character to a ground type
-  private IGroundType charToGround(char c) {
-    switch (c) {
-      case '_':
-        return new EmptyGround();
-      case 'H':
-        return new Hole();
-      case 'R':
-        return new Target(GameColor.RED);
-      case 'G':
-        return new Target(GameColor.GREEN);
-      case 'B':
-        return new Target(GameColor.BLUE);
-      case 'Y':
-        return new Target(GameColor.YELLOW);
-      default:
-        throw new IllegalArgumentException("Invalid ground character: " + c);
-    }
-  }
-
-  // Converts a character to a cell content
-  private ICellContent charToContent(char c) {
-    switch (c) {
-      case ' ':
-        return new EmptyContent();
-      case '_':
-        return new EmptyContent(); // Handle underscore as empty
-      case 'W':
-        return new Wall();
-      case 'B':
-        return new Crate();
-      case 'r':
-        return new Trophy(GameColor.RED);
-      case 'g':
-        return new Trophy(GameColor.GREEN);
-      case 'b':
-        return new Trophy(GameColor.BLUE);
-      case 'y':
-        return new Trophy(GameColor.YELLOW);
-      case '^':
-        return new Player(Direction.UP);
-      case 'v':
-        return new Player(Direction.DOWN);
-      case '<':
-        return new Player(Direction.LEFT);
-      case '>':
-        return new Player(Direction.RIGHT);
-      default:
-        throw new IllegalArgumentException("Invalid content character: " + c);
-    }
-  }
-
-  // Gets the cell at the given position, or null if out of bounds
-  public Cell getCell(Posn pos) {
+  // Gets the cell at the given position, throws error if out of bounds
+  Cell getCell(Posn pos) {
     if (pos.y < 0 || pos.y >= this.board.size() || pos.x < 0
         || pos.x >= this.board.get(pos.y).size()) {
-      return null;
+      throw new IllegalArgumentException("Position (" + pos.x + "," + pos.y + ") is out of bounds");
     }
     return this.board.get(pos.y).get(pos.x);
   }
 
-  // Sets the cell at the given position, returns true if successful
-  private boolean setCell(Posn pos, Cell cell) {
+  // Sets the cell at the given position, throws error if out of bounds
+  void setCell(Posn pos, Cell cell) {
     if (pos.y < 0 || pos.y >= this.board.size() || pos.x < 0
         || pos.x >= this.board.get(pos.y).size()) {
-      return false;
+      throw new IllegalArgumentException("Position (" + pos.x + "," + pos.y + ") is out of bounds");
     }
     this.board.get(pos.y).set(pos.x, cell);
-    return true;
   }
 
   // Attempts to move the player in the given direction
   boolean movePlayer(Direction dir) {
-    if (this.gameOver) {
+    if (this.gameOver || this.playerPos == null) {
       return false;
     }
 
-    // Update player direction even if they can't move
-    Cell playerCell = this.getCell(this.playerPos);
-    if (playerCell != null && playerCell.content instanceof Player) {
-      Player player = (Player) playerCell.content;
-      this.setCell(this.playerPos, playerCell.withContent(player.withDirection(dir)));
-    }
-
-    // Calculate target positions
-    Posn offset = dir.getOffset();
-    Posn newPos = new Posn(this.playerPos.x + offset.x, this.playerPos.y + offset.y);
-    Posn pushPos = new Posn(newPos.x + offset.x, newPos.y + offset.y);
-
-    // Get cells at target positions
-    Cell targetCell = this.getCell(newPos);
-    Cell pushTargetCell = this.getCell(pushPos);
-
-    // Check if movement is valid
-    if (targetCell == null) {
-      return false; // Out of bounds
-    }
-
-    if (targetCell.hasTrophyOnMatchingTarget()) {
-      return this.movePlayerOntoMatchingTrophy(newPos);
-    }
-
-    if (targetCell.isEmpty()) {
-      // Move to empty cell
-      return this.movePlayerTo(newPos, targetCell);
-    }
-    else if (targetCell.hasMovableContent() && !targetCell.hasPlayer()) {
-      // Try to push something
-      if (pushTargetCell == null || !pushTargetCell.isEmpty()) {
-        return false; // Can't push because the space behind is blocked.
+    try {
+      // Update player direction even if they can't move
+      Cell playerCell = this.getCell(this.playerPos);
+      if (playerCell.content.isPlayerContent()) {
+        Player player = new Player(dir);
+        this.setCell(this.playerPos, playerCell.withContent(player));
       }
 
-      ICellContent pushedContent = targetCell.content;
-
-      // Handle hole interaction for the pushed item:
-      if (pushTargetCell.isHole()) {
-        // The pushed item falls into the hole (both disappear)
-        this.setCell(pushPos,
-            pushTargetCell.withGround(new EmptyGround()).withContent(new EmptyContent()));
+      // Calculate target positions
+      Posn offset = dir.getOffset();
+      Posn newPos = new Posn(this.playerPos.x + offset.x, this.playerPos.y + offset.y);
+      
+      // Check if target position is within bounds
+      if (this.isOutOfBounds(newPos)) {
+        return false;
       }
-      else {
-        // Normal push: move the object into the free cell.
-        this.setCell(pushPos, pushTargetCell.withContent(pushedContent));
+      
+      Cell targetCell = this.getCell(newPos);
+
+      if (targetCell.hasTrophyOnMatchingTarget()) {
+        return this.movePlayerOntoMatchingTrophy(newPos);
       }
 
-      // Now move the player into the target cell (where the object was),
-      // updating the player's position as expected.
-      return this.movePlayerTo(newPos, targetCell.withContent(new EmptyContent()));
+      if (targetCell.isEmpty()) {
+        // Move to empty cell
+        return this.movePlayerTo(newPos, targetCell);
+      }
+      else if (targetCell.hasMovableContent()) {
+        // Try to push something
+        Posn pushPos = new Posn(newPos.x + offset.x, newPos.y + offset.y);
+        
+        // Check if push position is within bounds
+        if (this.isOutOfBounds(pushPos)) {
+          return false; // Can't push out of bounds
+        }
+        
+        Cell pushTargetCell = this.getCell(pushPos);
+        
+        if (!pushTargetCell.isEmpty()) {
+          return false; // Can't push because the space behind is blocked.
+        }
+
+        ICellContent pushedContent = targetCell.content;
+
+        // Handle hole interaction for the pushed item:
+        if (pushTargetCell.isHole()) {
+          // The pushed item falls into the hole (both disappear)
+          this.setCell(pushPos,
+              pushTargetCell.withGround(new EmptyGround()).withContent(new EmptyContent()));
+        }
+        else {
+          // Normal push: move the object into the free cell.
+          this.setCell(pushPos, pushTargetCell.withContent(pushedContent));
+        }
+
+        // Now move the player into the target cell (where the object was),
+        // updating the player's position as expected.
+        return this.movePlayerTo(newPos, targetCell.withContent(new EmptyContent()));
+      }
+      return false;
+    } catch (IllegalArgumentException e) {
+      return false; // Cell access error
     }
-    return false;
+  }
+  
+  // Helper method to check if a position is out of bounds
+  boolean isOutOfBounds(Posn pos) {
+    return (pos.y < 0 || pos.x < 0) || 
+        (this.board.size() <= pos.y) || 
+        (this.board.get(pos.y).size() <= pos.x);
   }
 
   // Helper: move player onto a cell with a matching trophy (without displacing it)
-  private boolean movePlayerOntoMatchingTrophy(Posn newPos) {
-    Cell playerCell = this.getCell(this.playerPos);
-    if (playerCell == null || !playerCell.hasPlayer()) {
+  boolean movePlayerOntoMatchingTrophy(Posn newPos) {
+    try {
+      Cell playerCell = this.getCell(this.playerPos);
+      if (!playerCell.hasPlayer()) {
+        return false;
+      }
+      // Remove the player from the old cell.
+      this.setCell(this.playerPos, playerCell.withContent(new EmptyContent()));
+      // Update player position.
+      this.playerPos = newPos;
+      this.checkWin();
+      return true;
+    } catch (IllegalArgumentException e) {
       return false;
     }
-    // Remove the player from the old cell.
-    this.setCell(this.playerPos, playerCell.withContent(new EmptyContent()));
-    // Update player position.
-    this.playerPos = newPos;
-    this.checkWin();
-    return true;
   }
 
   // Moves the player to the given position (and updates playerPos)
-  private boolean movePlayerTo(Posn newPos, Cell targetCell) {
-    Cell playerCell = this.getCell(this.playerPos);
-    if (playerCell == null || !playerCell.hasPlayer()) {
+  boolean movePlayerTo(Posn newPos, Cell targetCell) {
+    try {
+      Cell playerCell = this.getCell(this.playerPos);
+
+      if (targetCell.isHole()) {
+        // Player falls into hole, game over
+        this.setCell(newPos,
+            targetCell.withGround(new EmptyGround()).withContent(new EmptyContent()));
+        this.setCell(this.playerPos, playerCell.withContent(new EmptyContent()));
+        this.gameOver = true;
+        this.playerFell = true;
+        return true;
+      }
+
+      // Move player to target cell
+      this.setCell(newPos, targetCell.withContent(playerCell.content));
+      this.setCell(this.playerPos, playerCell.withContent(new EmptyContent()));
+      this.playerPos = newPos;
+      this.checkWin();
+      return true;
+    } catch (IllegalArgumentException e) {
       return false;
     }
-
-    if (targetCell.isHole()) {
-      // Player falls into hole, game over
-      this.setCell(newPos,
-          targetCell.withGround(new EmptyGround()).withContent(new EmptyContent()));
-      this.setCell(this.playerPos, playerCell.withContent(new EmptyContent()));
-      this.gameOver = true;
-      this.playerFell = true;
-      return true;
-    }
-
-    // Move player to target cell
-    this.setCell(newPos, targetCell.withContent(playerCell.content));
-    this.setCell(this.playerPos, playerCell.withContent(new EmptyContent()));
-    this.playerPos = newPos;
-    this.checkWin();
-    return true;
   }
 
   // Checks if the level is won (all targets have matching trophies)
-  private void checkWin() {
-    for (ArrayList<Cell> row : this.board) {
-      for (Cell cell : row) {
-        if (cell.ground.isTarget()
-            && (!cell.content.isTrophy() || cell.ground.getColor() != cell.content.getColor())) {
-          return; // Found an unfilled target
+  void checkWin() {
+    boolean allTargetsFilled = true;
+    
+    for (int i = 0; i < this.board.size(); i++) {
+      ArrayList<Cell> row = this.board.get(i);
+      for (int j = 0; j < row.size(); j++) {
+        Cell cell = row.get(j);
+        if (cell.ground.isTarget()) {
+          // If any target doesn't have a matching trophy, the game is not won
+          if (!cell.content.isTrophyContent() ||
+              !cell.ground.getColor().equals(cell.content.getColor())) {
+            allTargetsFilled = false;
+          }
         }
       }
     }
-    this.gameOver = true;
+    
+    if (allTargetsFilled) {
+      this.gameOver = true;
+    }
   }
 
   boolean isWon() {
@@ -669,14 +959,15 @@ class SokobanWorld extends World {
   SokobanLevel level;
   int width;
   int height;
+  DirectionFactory dirFactory;
 
   SokobanWorld(SokobanLevel level, int width, int height) {
     this.level = level;
     this.width = width;
     this.height = height;
+    this.dirFactory = new DirectionFactory();
   }
 
-  @Override
   public WorldScene makeScene() {
     WorldScene scene = this.level.render(this.width, this.height);
     if (this.level.isGameOver()) {
@@ -686,28 +977,86 @@ class SokobanWorld extends World {
     return scene;
   }
 
-  @Override
   public void onKeyEvent(String key) {
     Direction dir = null;
-    switch (key) {
-      case "up":
-        dir = Direction.UP;
-        break;
-      case "down":
-        dir = Direction.DOWN;
-        break;
-      case "left":
-        dir = Direction.LEFT;
-        break;
-      case "right":
-        dir = Direction.RIGHT;
-        break;
-      default:
-        break;
+    if (key.equals("up")) {
+      dir = this.dirFactory.getUp();
     }
+    else if (key.equals("down")) {
+      dir = this.dirFactory.getDown();
+    }
+    else if (key.equals("left")) {
+      dir = this.dirFactory.getLeft();
+    }
+    else if (key.equals("right")) {
+      dir = this.dirFactory.getRight();
+    }
+    
     if (dir != null) {
       this.level.movePlayer(dir);
     }
+  }
+}
+
+// Factory for Direction objects
+class DirectionFactory {
+  Direction up;
+  Direction down;
+  Direction left;
+  Direction right;
+  
+  DirectionFactory() {
+    this.up = new Direction("UP");
+    this.down = new Direction("DOWN");
+    this.left = new Direction("LEFT");
+    this.right = new Direction("RIGHT");
+  }
+  
+  Direction getUp() {
+    return this.up;
+  }
+  
+  Direction getDown() {
+    return this.down;
+  }
+  
+  Direction getLeft() {
+    return this.left;
+  }
+  
+  Direction getRight() {
+    return this.right;
+  }
+}
+
+// Factory for GameColor objects
+class GameColorFactory {
+  GameColor red;
+  GameColor green;
+  GameColor blue;
+  GameColor yellow;
+  
+  GameColorFactory() {
+    this.red = new GameColor("RED");
+    this.green = new GameColor("GREEN");
+    this.blue = new GameColor("BLUE");
+    this.yellow = new GameColor("YELLOW");
+  }
+  
+  GameColor getRed() {
+    return this.red;
+  }
+  
+  GameColor getGreen() {
+    return this.green;
+  }
+  
+  GameColor getBlue() {
+    return this.blue;
+  }
+  
+  GameColor getYellow() {
+    return this.yellow;
   }
 }
 
@@ -719,21 +1068,21 @@ class Sokoban {
   String introLevelContents = "__WWW___\n" + "__W>WW__\n" + "WWW__WWW\n" + "W_bg__rW\n"
       + "WWyWWWWW\n" + "_WW_W___\n" + "__WWW___";
 
-  String holeLevelGround = "________\n" + "________\n" + "__H_____\n" + "_RHHR___\n"
+  String holeLevelGround = "________\n" + "________\n" + "__H_____\n" + "__HHR___\n"
       + "________\n" + "________\n" + "________";
 
-  String holeLevelContents = "WWWWWWWW\n" + "W______W\n" + "W_>____W\n" + "W_r____W\n"
+  String holeLevelContents = "WWWWWWWW\n" + "W_>____W\n" + "W______W\n" + "W____r_W\n"
       + "W______W\n" + "WWWWWWWW\n" + "________";
 
-  public boolean runIntroLevel(Tester t) {
-    SokobanLevel level = new SokobanLevel(introLevelGround, introLevelContents);
+  boolean runIntroLevel(Tester t) {
+    SokobanLevel level = new SokobanLevel(this.introLevelGround, this.introLevelContents);
     SokobanWorld world = new SokobanWorld(level, 400, 400);
     world.bigBang(400, 400, 0.1);
     return true;
   }
 
-  public boolean runHoleLevel(Tester t) {
-    SokobanLevel level = new SokobanLevel(holeLevelGround, holeLevelContents);
+  boolean runHoleLevel(Tester t) {
+    SokobanLevel level = new SokobanLevel(this.holeLevelGround, this.holeLevelContents);
     SokobanWorld world = new SokobanWorld(level, 400, 400);
     world.bigBang(400, 400, 0.1);
     return true;
